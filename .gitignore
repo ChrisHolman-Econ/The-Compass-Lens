@@ -1,0 +1,5 @@
+data/raw/
+.Rhistory
+.Rproj.user/
+*.RData
+.Renviron
