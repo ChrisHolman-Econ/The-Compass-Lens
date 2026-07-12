@@ -5,7 +5,7 @@
 # ==============================================================================
 
 library(data.table)
-library(dplyr)
+library(tidyverse)
 library(stringr)
 
 # 1. SETUP PATHS & CONFIGURATION
@@ -35,15 +35,19 @@ setnames(laus_raw, names(laus_raw), trimws(names(laus_raw)))
 # Parse the 20-character BLS LAUS Series ID
 # Format: LAUCN261610000000003 -> State: 26, County: 161, Measure: 03
 laus_clean <- laus_raw %>%
-  lazy_dt() %>%
+  mutate(
+    series_id = trimws(series_id),
+    period    = trimws(period),
+    value     = trimws(value)
+  ) %>%
   filter(str_detect(series_id, "^LAUCN")) %>%
   mutate(
     state_fips   = substr(series_id, 6, 7),
     county_fips  = substr(series_id, 8, 10),
-    measure_code = substr(series_id, 18, 19)
+    measure_code = substr(series_id, 19, 20) 
   ) %>%
   filter(state_fips == MI_FIPS & county_fips %in% names(COUNTY_MAP)) %>%
-  filter(period != "M13") %>% # Strip the annual average trap
+  filter(period != "M13") %>% 
   mutate(
     county_name = COUNTY_MAP[county_fips],
     date = as.Date(paste(year, substr(period, 2, 3), "01", sep = "-")),
@@ -56,8 +60,11 @@ laus_clean <- laus_raw %>%
     ),
     value = as.numeric(value)
   ) %>%
-  filter(!is.na(metric) & !is.na(value)) %>%
-  as.data.table()
+  filter(!is.na(metric) & !is.na(value))
+
+# Print to confirm the data survived the pipe!
+print(nrow(laus_clean))
+print(head(laus_clean, 3))
 
 # 3. CLEAN & PARSE CES (CURRENT EMPLOYMENT STATISTICS)
 cat("[*] Processing CES State & Area Payrolls...\n")
@@ -67,7 +74,6 @@ setnames(ces_raw, names(ces_raw), trimws(names(ces_raw)))
 # Format: SMU26356600000000001 -> State: 26, Area: 35660 (Detroit MSA), Industry: 00000000 (Total Nonfarm)
 # Let's track Michigan statewide (00000) and Detroit-Warren-Dearborn MSA (35660)
 ces_clean <- ces_raw %>%
-  lazy_dt() %>%
   filter(str_detect(series_id, "^SMU")) %>%
   mutate(
     state_fips    = substr(series_id, 4, 5),
@@ -83,8 +89,7 @@ ces_clean <- ces_raw %>%
     metric = if_else(industry_code == "00000000", "total_nonfarm_payroll", paste0("ind_", industry_code)),
     value = as.numeric(value)
   ) %>%
-  filter(metric == "total_nonfarm_payroll" & !is.na(value)) %>%
-  as.data.table()
+  filter(metric == "total_nonfarm_payroll" & !is.na(value))
 
 # 4. PIVOT WIDE & CONSOLIDATE
 cat("[*] Reshaping and assembling the Wide Master dataframe...\n")
@@ -110,7 +115,7 @@ if (file.exists(sentiment_file)) {
 
 # 6. SAVE PRODUCTION-READY ASSETS
 cat("[*] Exporting master data matrices to data/processed/...\n")
-fwrite(laus_wide, file.path(PROCESSED_DIR, "master_county_pulse.csv"))
-fwrite(ces_wide, file.path(PROCESSED_DIR, "master_payroll_pulse.csv"))
+write_rds(laus_wide, file.path(PROCESSED_DIR, "master_county_pulse.rds"))
+write_rds(ces_wide, file.path(PROCESSED_DIR, "master_payroll_pulse.rds"))
 
 cat("\n[✓] SUCCESS: Data pipeline transformation clean! Ready for analysis tomorrow morning.\n")
