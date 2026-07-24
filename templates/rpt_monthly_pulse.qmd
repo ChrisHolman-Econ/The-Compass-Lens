@@ -1,7 +1,7 @@
 ---
 title: "OWL Corridor Economic Pulse"
 subtitle: "Regional Labor Market Analytics & Trend Reports"
-author: "The Compass Lens"
+author: "Great Lakes Center for Economics"
 date: today
 date-format: "MMMM YYYY"
 format:
@@ -42,23 +42,23 @@ latest_snapshot <- master_data %>%
 
 ## Executive Summary
 
-This regional brief highlights the post-pandemic structural labor market normalization across the **OWL Corridor** (Oakland, Washtenaw, and Livingston counties). Utilizing data integrated dynamically via the Local Area Unemployment Statistics (LAUS) program, these metrics reflect localized labor force shifts and regional stability.
+This regional brief highlights the post-pandemic structural labor market dynamics across the **OWL Corridor** (Oakland, Washtenaw, and Livingston counties). Utilizing data integrated dynamically via the Local Area Unemployment Statistics (LAUS) program, these metrics reflect localized labor force shifts and regional stability.
 
-The latest updated metrics in this report reflect data through the active reporting period.
+The latest updated metrics in this report reflect data through **`r latest_date_str`**.
 
 ---
 
 ## Unemployment Rate Trajectories
 
-The chart below outlines the structural normalization of the regional unemployment rate. The deep navy line establishes the baseline for institutional scale, while gold spotlights key localized divergence.
+The chart below outlines the structural normalization of the regional unemployment rate. The deep navy line establishes the baseline for Oakland County , while gold and white represents Washtenaw and Livingston Counties respectively.
 
 ::: {.panel-tabset}
 
-### Chart Visualization
+### Unemployment Visualization
 
 ![Unemployment Rate Horizon: Post-pandemic normalization across the OWL Corridor.](../plots/laus_unemployment_rates.png){#fig-unemployment width=100%}
 
-### Core Takeaways
+### Core Unemployment Takeaways
 
 * **Structural Stabilization:** Regional unemployment rates continue to trend near historical baselines, moving out of post-pandemic fluctuations into long-term equilibrium.
 * **Corridor Alignment:** The tight distribution among the three primary counties highlights deep economic integration within the regional transit and employment corridors.
@@ -71,7 +71,17 @@ The chart below outlines the structural normalization of the regional unemployme
 
 To observe true relative resource scaling, local labor supply capacities are indexed to a baseline of **January 2022 = 100**. This removes pure absolute scale differences (such as Oakland's larger raw population) to trace true expansion velocities.
 
+::: {.panel-tabset}
+
+### Labor Force Visualization
+
 ![Labor Force Capacity: Indexed growth trends relative to the January 2022 baseline.](../plots/laus_labor_force_indexed.png){#fig-laborforce width=100%}
+
+### Core Labor Force Takeaways
+* **Indexed Growth:** All three counties have experienced a net expansion in labor force capacity since January 2022, with Washtenaw County displaying a distinct trajectory relative to the rest of the corridor.
+* **Relative Velocity:** Washtenaw County's labor force growth has outpaced the other counties up until October 2025 when it experienced a downturn. Estimates in April 2026 suggest its progress has retreated below January 2022 levels.
+
+:::
 
 > **Methodological Note:** An indexed baseline of 100 means a metric value of 104 represents a clean 4% expansion in the total available labor supply pool since January 2022, regardless of raw population counts.
 
@@ -80,6 +90,8 @@ To observe true relative resource scaling, local labor supply capacities are ind
 ## Data Provenance & Reliability
 
 Data streams are ingested directly from primary federal and state reporting nodes. Technical calculations, data processing, and visualization builds are automated programmatically by *The Compass Lens* core data architecture to eliminate transcription vulnerabilities.
+
+All data, analysis, and views presented herein are independent work products of Great Lakes Center for Economics.
 
 | Metric Component | Primary Source Agency | Spatial Resolution | Update Cadence |
 |---|---|---|---|
