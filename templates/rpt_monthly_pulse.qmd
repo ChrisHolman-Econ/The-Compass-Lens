@@ -87,7 +87,7 @@ To observe true relative resource scaling, local labor supply capacities are ind
 
 ***
 
-> **Data Note:** *Metrics reflect official LAUS/BLS benchmarks as of `r format(Sys.Date(), "%B %d, %Y")`. Historical series incorporate all revised estimates released through `r latest_date_str`. In October 2025, a federal government shutdown which prohibited the collection of LAUS data. There is no LAUS data for October 2025.*
+> **Data Note:** *Metrics reflect official LAUS/BLS benchmarks as of `r format(Sys.Date(), "%B %d, %Y")`. Historical series incorporate all revised estimates released through `r latest_date_str`. In October 2025, a lapse in federal funding prohibited the collection of LAUS data. There is no LAUS data for October 2025.*
 
 ---
 
