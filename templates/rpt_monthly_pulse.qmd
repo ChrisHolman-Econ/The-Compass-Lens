@@ -50,7 +50,7 @@ The latest updated metrics in this report reflect data through **`r latest_date_
 
 ## Unemployment Rate Trajectories
 
-The chart below outlines the structural normalization of the regional unemployment rate. The deep navy line establishes the baseline for Oakland County , while gold and white represents Washtenaw and Livingston Counties respectively.
+The chart below outlines the structural normalization of the regional unemployment rate. The green line establishes the baseline for Oakland County, while Navy and Orange represent Washtenaw and Livingston Counties respectively.
 
 ::: {.panel-tabset}
 
@@ -79,11 +79,15 @@ To observe true relative resource scaling, local labor supply capacities are ind
 
 ### Core Labor Force Takeaways
 * **Indexed Growth:** All three counties have experienced a net expansion in labor force capacity since January 2022, with Washtenaw County displaying a distinct trajectory relative to the rest of the corridor.
-* **Relative Velocity:** Washtenaw County's labor force growth has outpaced the other counties up until October 2025 when it experienced a downturn. Estimates in April 2026 suggest its progress has retreated below January 2022 levels.
+* **Relative Velocity:** Washtenaw County's labor force growth has outpaced the other counties up until Septemer 2025 when it experienced a downturn. Estimates in May 2026 shows the labor force has increased marginally and resumes tracking the progress in neighboring counties in the OWL Corridor.
 
 :::
 
 > **Methodological Note:** An indexed baseline of 100 means a metric value of 104 represents a clean 4% expansion in the total available labor supply pool since January 2022, regardless of raw population counts.
+
+***
+
+> **Data Note:** *Metrics reflect official LAUS/BLS benchmarks as of `r format(Sys.Date(), "%B %d, %Y")`. Historical series incorporate all revised estimates released through `r latest_date_str`. In October 2025, a federal government shutdown which prohibited the collection of LAUS data. There is no LAUS data for October 2025.*
 
 ---
 
