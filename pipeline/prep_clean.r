@@ -97,8 +97,21 @@ cat("[*] Reshaping and assembling the Wide Master dataframe...\n")
 # Pivot LAUS to wide structure
 laus_wide <- dcast(laus_clean, county_name + date ~ metric, value.var = "value")
 
+# --- INSERT FIX HERE ---
+# Force explicit NA rows for missing months (e.g., October 2025) across all counties
+laus_wide <- laus_wide %>%
+  as_tibble() %>%
+  group_by(county_name) %>%
+  complete(date = seq.Date(min(date), max(date), by = "1 month")) %>%
+  ungroup()
+# -----------------------
+
 # Pivot CES to wide structure
-ces_wide <- dcast(ces_clean, region_name + date ~ metric, value.var = "value")
+ces_wide <- dcast(ces_clean, region_name + date ~ metric, value.var = "value") %>%
+  as_tibble() %>%
+  group_by(region_name) %>%
+  complete(date = seq.Date(min(date), max(date), by = "1 month")) %>%
+  ungroup()
 
 # 5. INTEGRATE FRED CONSUMER SENTIMENT (UMICH)
 cat("[*] Merging Consumer Sentiment benchmarks...\n")
@@ -115,7 +128,23 @@ if (file.exists(sentiment_file)) {
 
 # 6. SAVE PRODUCTION-READY ASSETS
 cat("[*] Exporting master data matrices to data/processed/...\n")
+
+# Save internal binary RDS files
 write_rds(laus_wide, file.path(PROCESSED_DIR, "master_county_pulse.rds"))
 write_rds(ces_wide, file.path(PROCESSED_DIR, "master_payroll_pulse.rds"))
 
-cat("\n[✓] SUCCESS: Data pipeline transformation clean! Ready for analysis tomorrow morning.\n")
+# Generate Pro Tier CSV download
+laus_pro_export <- laus_wide %>%
+  select(
+    `Date`                  = date,
+    `County`                = county_name,
+    `Labor Force`           = labor_force,
+    `Employed`              = employed_count,
+    `Unemployed`            = unemployed_count,
+    `Unemployment Rate (%)` = unemployment_rate
+  ) %>%
+  mutate(Date = format(Date, "%B %Y"))
+
+write_csv(laus_pro_export, file.path(PROCESSED_DIR, "OWL_Corridor_County_Data.csv"))
+
+cat("\n[✓] SUCCESS: Data pipeline transformation clean! RDS & CSV files exported.\n")
