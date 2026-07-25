@@ -16,7 +16,7 @@ doc_filename <- paste0(date_stamp, "_compass_lens.docx")
 cat("Rendering release for:", date_stamp, "...\n")
 
 quarto_render(
-  input = here("reports", "index.qmd"),
+  input = here("templates", "rpt_monthly_pulse.qmd"),
   output_format = "docx",
   output_file = doc_filename
 )

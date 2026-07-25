@@ -3,11 +3,34 @@
 # ==============================================================================
 
 # 1. CENTRALIZED BRAND PALETTE
-# Navy handles structural/baseline elements; Gold highlights specific series
+# Master Brand Palette for Counties & Regional Benchmarks
 COMPASS_PALETTE <- c(
-  "Oakland"    = "#1B365D",  # Deep Navy Blue
-  "Washtenaw"  = "#D4AF37",  # Metallic Gold Accent
-  "Livingston" = "#4A5568"   # Slate Gray (Muted secondary baseline)
+  "OWL Corridor" = "#6B21A8", # Plum Purple (Subtle Regional Aggregate)
+  "Washtenaw"    = "#00274C", # Michigan Navy (U of M Anchor)
+  "Oakland"      = "#15803D", # Forest Green (County Baseline)
+  "Livingston"   = "#C2410C", # Institutional Burnt Orange (Brighton Anchor)
+  "Michigan"     = "#475569", # Muted Slate (Macro Benchmark)
+  "United States"= "#94A3B8"  # Cool Gray (National Baseline)
+)
+
+# Define Line Styles
+owl_linetypes <- c(
+  "OWL Corridor" = "solid",
+  "Washtenaw"    = "solid",
+  "Oakland"      = "solid",
+  "Livingston"   = "solid",
+  "Michigan"     = "dashed",
+  "United States"= "dotted"
+)
+
+# Line Width Hierarchy
+owl_widths <- c(
+  "OWL Corridor" = 1.2,  # Thicker line to draw the eye
+  "Washtenaw"    = 0.9,
+  "Oakland"      = 0.9,
+  "Livingston"   = 0.9,
+  "Michigan"     = 0.8,
+  "United States"= 0.8
 )
 
 # 2. CUSTOM THEME FUNCTION FOR REUSE
@@ -29,7 +52,7 @@ theme_compass <- function(base_size = 11) {
       axis.title.x  = element_blank(), # Keep clean since dates are self-explanatory
       axis.text     = element_text(size = 9, color = "black"),
       
-      # Clean Grid Layouts (Drop vertical lines to emphasize the horizontal scale)
+      # Clean Grid Layouts (Drop vertical lines to emphasize horizontal scale)
       panel.grid.minor   = element_blank(),
       panel.grid.major.y = element_line(color = "gray92", linewidth = 0.5),
       panel.grid.major.x = element_blank(),
