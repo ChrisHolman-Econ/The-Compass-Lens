@@ -79,7 +79,7 @@ To observe true relative resource scaling, local labor supply capacities are ind
 
 ### Core Labor Force Takeaways
 * **Indexed Growth:** All three counties have experienced a net expansion in labor force capacity since January 2022, with Washtenaw County displaying a distinct trajectory relative to the rest of the corridor.
-* **Relative Velocity:** Washtenaw County's labor force growth has outpaced the other counties up until Septemer 2025 when it experienced a downturn. Estimates in May 2026 shows the labor force has increased marginally and resumes tracking the progress in neighboring counties in the OWL Corridor.
+* **Relative Velocity:** Washtenaw County’s labor force expansion significantly outpaced the broader corridor through late 2025 before undergoing a sharp cyclical contraction. As of May 2026, Washtenaw’s 12-month moving average has largely re-aligned with neighboring Oakland and Livingston counties—suggesting the regional labor supply pool is returning to macro parity after a multi-year volatility cycle.
 
 :::
 

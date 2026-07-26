@@ -33,7 +33,6 @@ laus_raw <- fread(file.path(RAW_DIR, "laus_county.txt"), sep = "\t", header = TR
 setnames(laus_raw, names(laus_raw), trimws(names(laus_raw)))
 
 # Parse the 20-character BLS LAUS Series ID
-# Format: LAUCN261610000000003 -> State: 26, County: 161, Measure: 03
 laus_clean <- laus_raw %>%
   mutate(
     series_id = trimws(series_id),
@@ -62,17 +61,11 @@ laus_clean <- laus_raw %>%
   ) %>%
   filter(!is.na(metric) & !is.na(value))
 
-# Print to confirm the data survived the pipe!
-print(nrow(laus_clean))
-print(head(laus_clean, 3))
-
 # 3. CLEAN & PARSE CES (CURRENT EMPLOYMENT STATISTICS)
 cat("[*] Processing CES State & Area Payrolls...\n")
 ces_raw <- fread(file.path(RAW_DIR, "ces_state_area.txt"), sep = "\t", header = TRUE, fill = TRUE)
 setnames(ces_raw, names(ces_raw), trimws(names(ces_raw)))
 
-# Format: SMU26356600000000001 -> State: 26, Area: 35660 (Detroit MSA), Industry: 00000000 (Total Nonfarm)
-# Let's track Michigan statewide (00000) and Detroit-Warren-Dearborn MSA (35660)
 ces_clean <- ces_raw %>%
   filter(str_detect(series_id, "^SMU")) %>%
   mutate(
@@ -82,7 +75,7 @@ ces_clean <- ces_raw %>%
     data_type     = substr(series_id, 19, 20)
   ) %>%
   filter(state_fips == MI_FIPS & area_code %in% c("00000", "35660")) %>%
-  filter(period != "M13" & data_type == "01") %>% # 01 is All Employees
+  filter(period != "M13" & data_type == "01") %>% 
   mutate(
     region_name = if_else(area_code == "00000", "Michigan Statewide", "Detroit MSA"),
     date = as.Date(paste(year, substr(period, 2, 3), "01", sep = "-")),
@@ -91,29 +84,48 @@ ces_clean <- ces_raw %>%
   ) %>%
   filter(metric == "total_nonfarm_payroll" & !is.na(value))
 
-# 4. PIVOT WIDE & CONSOLIDATE
-cat("[*] Reshaping and assembling the Wide Master dataframe...\n")
+# ==============================================================================
+# 4. PIVOT WIDE, CONSOLIDATE & BUILD REGIONAL AGGREGATE
+# ==============================================================================
+cat("[*] Reshaping, completing date sequences, and generating Regional Summary...\n")
 
-# Pivot LAUS to wide structure
-laus_wide <- dcast(laus_clean, county_name + date ~ metric, value.var = "value")
-
-# --- INSERT FIX HERE ---
-# Force explicit NA rows for missing months (e.g., October 2025) across all counties
-laus_wide <- laus_wide %>%
+# 1. Pivot LAUS to wide structure & force missing date completion
+laus_wide <- dcast(laus_clean, county_name + date ~ metric, value.var = "value") %>%
   as_tibble() %>%
   group_by(county_name) %>%
   complete(date = seq.Date(min(date), max(date), by = "1 month")) %>%
   ungroup()
-# -----------------------
 
-# Pivot CES to wide structure
+# 2. GENERATE REGIONAL AGGREGATE (OWL CORRIDOR TOTAL)
+owl_region_summary <- laus_wide %>%
+  group_by(date) %>%
+  summarize(
+    county_name       = "OWL Corridor",
+    
+    # Safely sum counts (returns NA if all values in that month are NA)
+    labor_force       = if (all(is.na(labor_force))) NA_real_ else sum(labor_force, na.rm = TRUE),
+    employed_count    = if (all(is.na(employed_count))) NA_real_ else sum(employed_count, na.rm = TRUE),
+    unemployed_count  = if (all(is.na(unemployed_count))) NA_real_ else sum(unemployed_count, na.rm = TRUE),
+    
+    # Recalculate true regional rate
+    unemployment_rate = (unemployed_count / labor_force) * 100,
+    
+    .groups = "drop"
+  )
+
+# 3. Combine individual counties with regional aggregate
+laus_wide <- bind_rows(laus_wide, owl_region_summary)
+
+# 4. Pivot CES to wide structure (RESOVED BUG: Restored missing ces_wide block)
 ces_wide <- dcast(ces_clean, region_name + date ~ metric, value.var = "value") %>%
   as_tibble() %>%
   group_by(region_name) %>%
   complete(date = seq.Date(min(date), max(date), by = "1 month")) %>%
   ungroup()
 
+# ==============================================================================
 # 5. INTEGRATE FRED CONSUMER SENTIMENT (UMICH)
+# ==============================================================================
 cat("[*] Merging Consumer Sentiment benchmarks...\n")
 sentiment_file <- file.path(RAW_DIR, "consumer_sentiment.txt")
 
@@ -122,29 +134,33 @@ if (file.exists(sentiment_file)) {
   setnames(sentiment_raw, c("date", "consumer_sentiment"))
   sentiment_raw[, date := as.Date(date)]
   
-  # Join sentiment onto our regional dataframes by date
-  laus_wide <- merge(laus_wide, sentiment_raw, by = "date", all.x = TRUE)
+  laus_wide <- left_join(laus_wide, sentiment_raw, by = "date")
 }
 
+# ==============================================================================
 # 6. SAVE PRODUCTION-READY ASSETS
+# ==============================================================================
 cat("[*] Exporting master data matrices to data/processed/...\n")
 
-# Save internal binary RDS files
+# Save binary RDS files
 write_rds(laus_wide, file.path(PROCESSED_DIR, "master_county_pulse.rds"))
 write_rds(ces_wide, file.path(PROCESSED_DIR, "master_payroll_pulse.rds"))
 
-# Generate Pro Tier CSV download
+# Export Pro Tier CSV download
 laus_pro_export <- laus_wide %>%
   select(
     `Date`                  = date,
-    `County`                = county_name,
+    `Area`                  = county_name, # Renamed from `County`
     `Labor Force`           = labor_force,
     `Employed`              = employed_count,
     `Unemployed`            = unemployed_count,
     `Unemployment Rate (%)` = unemployment_rate
   ) %>%
-  mutate(Date = format(Date, "%B %Y"))
+  mutate(
+    `Adjustment Status` = "NSA",
+    Date = format(Date, "%B %Y")
+  )
 
-write_csv(laus_pro_export, file.path(PROCESSED_DIR, "OWL_Corridor_County_Data.csv"))
+write_csv(laus_pro_export, file.path(PROCESSED_DIR, "OWL_Corridor_Area_Data.csv"))
 
 cat("\n[✓] SUCCESS: Data pipeline transformation clean! RDS & CSV files exported.\n")
