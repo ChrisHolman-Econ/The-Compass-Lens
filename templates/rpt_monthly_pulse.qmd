@@ -75,7 +75,7 @@ To observe true relative resource scaling, local labor supply capacities are ind
 
 ### Labor Force Visualization
 
-![Labor Force Capacity: Indexed growth trends relative to the January 2022 baseline.](../plots/laus_labor_force_indexed.png){#fig-laborforce width=100%}
+![Labor Force Capacity: Indexed growth trends relative to the January 2022 baseline.](../plots/laus_labor_force_indexed_12ma.png){#fig-laborforce width=100%}
 
 ### Core Labor Force Takeaways
 * **Indexed Growth:** All three counties have experienced a net expansion in labor force capacity since January 2022, with Washtenaw County displaying a distinct trajectory relative to the rest of the corridor.
