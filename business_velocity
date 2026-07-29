@@ -1,0 +1,18 @@
+library(tidyverse)
+library(tigris)
+library(sf)
+
+# 1. Download Michigan County Shapefiles (FIPS in GEOID)
+mi_map <- counties(state = "MI", cb = TRUE)
+
+# 2. Load Census Business Formation Statistics CSV
+# File includes: FIPS, County, State, Business_Applications, High_Propensity_Applications
+bfs_data <- read_csv("https://www2.census.gov/econ/bfs/csv/county/bfs_county_current.csv") %>%
+  filter(State == "MI") %>%
+  mutate(GEOID = sprintf("%05d", as.numeric(FIPS)))
+
+# 3. Join spatial data with business data by FIPS
+map_data <- mi_map %>%
+  left_join(bfs_data, by = "GEOID")
+
+# 4. Ready for ggplot / tmap export!

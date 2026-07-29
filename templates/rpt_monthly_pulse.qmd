@@ -50,7 +50,7 @@ The latest updated metrics in this report reflect data through **`r latest_date_
 
 ## Unemployment Rate Trajectories
 
-The chart below outlines the structural normalization of the regional unemployment rate. The green line establishes the baseline for Oakland County, while Navy and Orange represent Washtenaw and Livingston Counties respectively.
+The chart below outlines the structural normalization of the regional unemployment rate. The **purple line** establishes the aggregate baseline for the **OWL Corridor**, while **green** indicates Oakland County, **navy** represents Washtenaw County, and **orange** represents Livingston County.
 
 ::: {.panel-tabset}
 
@@ -78,7 +78,7 @@ To observe true relative resource scaling, local labor supply capacities are ind
 ![Labor Force Capacity: Indexed growth trends relative to the January 2022 baseline.](../plots/laus_labor_force_indexed_12ma.png){#fig-laborforce width=100%}
 
 ### Core Labor Force Takeaways
-* **Indexed Growth:** All three counties have experienced a net expansion in labor force capacity since January 2022, with Washtenaw County displaying a distinct trajectory relative to the rest of the corridor.
+* **Indexed Growth:** All three counties have experienced a net expansion in labor force capacity since January 2022, with Washtenaw County displaying a distinct trajectory relative to the rest of the OWL Corridor trend (purple).
 * **Relative Velocity:** Washtenaw County’s labor force expansion significantly outpaced the broader corridor through late 2025 before undergoing a sharp cyclical contraction. As of May 2026, Washtenaw’s 12-month moving average has largely re-aligned with neighboring Oakland and Livingston counties—suggesting the regional labor supply pool is returning to macro parity after a multi-year volatility cycle.
 
 :::
@@ -93,11 +93,11 @@ To observe true relative resource scaling, local labor supply capacities are ind
 
 ## Data Provenance & Reliability
 
-Data streams are ingested directly from primary federal and state reporting nodes. Technical calculations, data processing, and visualization builds are automated programmatically by *The Compass Lens* core data architecture to eliminate transcription vulnerabilities.
+Data streams are ingested directly from primary federal and state reporting nodes, including the U.S. Bureau of Labor Statistics (BLS). Technical calculations, data processing, and visualization builds are automated programmatically by The Compass Lens core data architecture to eliminate transcription vulnerabilities; however, downstream metrics remain reliant on the underlying accuracy and fidelity of official source releases.
 
-All data, analysis, and views presented herein are independent work products of Great Lakes Center for Economics.
+All data, analysis, and views presented herein are independent work products of Great Lakes Center for Economics and are subject to standard historical revisions by official reporting agencies.
 
-| Metric Component | Primary Source Agency | Spatial Resolution | Update Cadence |
-|---|---|---|---|
-| **Local Area Unemployment** | Bureau of Labor Statistics (LAUS) | County Level | Monthly |
-| **Consumer Sentiment** | University of Michigan | National Baseline | Monthly |
+| Metric Component | Primary Source Agency | Spatial Resolution | Update Cadence | Adjustments |
+|---|---|---|---|---|
+| **Local Area Unemployment** | Bureau of Labor Statistics (LAUS) | County Level | Monthly | Not seasonally adjusted |
+| **Consumer Sentiment** | University of Michigan | National Baseline | Monthly | Not Seasonally Adjusted (NSA) |
