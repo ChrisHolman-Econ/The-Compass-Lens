@@ -50,7 +50,7 @@ The latest updated metrics in this report reflect data through **`r latest_date_
 
 ## Unemployment Rate Trajectories
 
-The chart below outlines the structural normalization of the regional unemployment rate. The **purple line** establishes the aggregate baseline for the **OWL Corridor**, while **green** indicates Oakland County, **navy** represents Washtenaw County, and **orange** represents Livingston County.
+The chart below outlines the regional unemployment rate for each of the member counties. The **purple line** establishes the aggregate baseline for the **OWL Corridor**, while **green** indicates Oakland County, **navy** represents Washtenaw County, and **orange** represents Livingston County.
 
 ::: {.panel-tabset}
 
@@ -60,8 +60,8 @@ The chart below outlines the structural normalization of the regional unemployme
 
 ### Core Unemployment Takeaways
 
-* **Structural Stabilization:** Regional unemployment rates continue to trend near historical baselines, moving out of post-pandemic fluctuations into long-term equilibrium.
-* **Corridor Alignment:** The tight distribution among the three primary counties highlights deep economic integration within the regional transit and employment corridors.
+* **Structural Stabilization:** Typically, Livingston County exhibits the lowest unemployment rate, followed by Oakland and Washtenaw counties. The post-pandemic normalization of unemployment rates across the corridor is evident, with all three counties converging toward historical baselines. Recently the rates have increased slightly across the corridor, but remaining inline with the historical range since mid 2024. 
+* **Corridor Alignment:** The unemployment rate for the counties of the OWL Corridor moves in unision with the regional rate, suggesting that the corridor is a cohesive labor market unit. The corridor's unemployment rate is currently at **`r round(latest_snapshot$unemployment_rate[latest_snapshot$county == "OWL Corridor"], 1)`%**, which is **`r round(latest_snapshot$unemployment_rate[latest_snapshot$county == "OWL Corridor"] - latest_snapshot$unemployment_rate[latest_snapshot$county == "Michigan"], 1)`%** below the state average of **`r round(latest_snapshot$unemployment_rate[latest_snapshot$county == "Michigan"], 1)`%**.
 
 :::
 
@@ -78,8 +78,8 @@ To observe true relative resource scaling, local labor supply capacities are ind
 ![Labor Force Capacity: Indexed growth trends relative to the January 2022 baseline.](../plots/laus_labor_force_indexed_12ma.png){#fig-laborforce width=100%}
 
 ### Core Labor Force Takeaways
-* **Indexed Growth:** All three counties have experienced a net expansion in labor force capacity since January 2022, with Washtenaw County displaying a distinct trajectory relative to the rest of the OWL Corridor trend (purple).
-* **Relative Velocity:** Washtenaw County’s labor force expansion significantly outpaced the broader corridor through late 2025 before undergoing a sharp cyclical contraction. As of May 2026, Washtenaw’s 12-month moving average has largely re-aligned with neighboring Oakland and Livingston counties—suggesting the regional labor supply pool is returning to macro parity after a multi-year volatility cycle.
+* **Indexed Growth:** The labor force for all three counties in the OWL Corridor has expanded since January 2022. Washtenaw County has experienced more pronounced swings in its labor force compared to the other counties of the corridor.
+* **Relative Velocity:** A monthly analysis of the unemployment rate would suggest that Washtenaw County is diverting from the corridor trend, with a decline relative to the other counties. The 12-month moving average index shows that Washtenaw is instead returning to parity with the corridor trend, suggesting that the county is returning to a more normalized labor market after a period of increased labor market involvement.
 
 :::
 
