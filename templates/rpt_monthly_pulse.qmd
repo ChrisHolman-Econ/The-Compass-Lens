@@ -50,7 +50,7 @@ The latest updated metrics in this report reflect data through **`r latest_date_
 
 ## Unemployment Rate Trajectories
 
-The chart below outlines the regional unemployment rate for each of the member counties. The **purple line** establishes the aggregate baseline for the **OWL Corridor**, while **green** indicates Oakland County, **navy** represents Washtenaw County, and **orange** represents Livingston County.
+The chart below outlines the regional unemployment rate for each of the member counties. The **purple line** establishes the aggregate baseline for the **OWL Corridor**, while **green** indicates Oakland County, **navy** represents Washtenaw County, and **orange** represents Livingston County. While individual county trends appear muted relative to the primary corridor baseline, their alignment underscores how tightly integrated these local economies are.
 
 ::: {.panel-tabset}
 
@@ -79,7 +79,7 @@ To observe true relative resource scaling, local labor supply capacities are ind
 
 ### Core Labor Force Takeaways
 * **Indexed Growth:** The labor force for all three counties in the OWL Corridor has expanded since January 2022. Washtenaw County has experienced more pronounced swings in its labor force compared to the other counties of the corridor.
-* **Relative Velocity:** A monthly analysis of the unemployment rate would suggest that Washtenaw County is diverting from the corridor trend, with a decline relative to the other counties. The 12-month moving average index shows that Washtenaw is instead returning to parity with the corridor trend, suggesting that the county is returning to a more normalized labor market after a period of increased labor market involvement.
+* **Relative Velocity:** A monthly analysis of the labor force  would suggest that Washtenaw County is diverting from the corridor trend, with a decline relative to the other counties. The 12-month moving average index shows that Washtenaw is instead returning to parity with the corridor trend, suggesting that the county is returning to a more normalized labor market after a period of increased labor market involvement.
 
 :::
 
@@ -97,7 +97,7 @@ Data streams are ingested directly from primary federal and state reporting node
 
 All data, analysis, and views presented herein are independent work products of Great Lakes Center for Economics and are subject to standard historical revisions by official reporting agencies.
 
-| Metric Component | Primary Source Agency | Spatial Resolution | Update Cadence | Adjustments |
-|---|---|---|---|---|
-| **Local Area Unemployment** | Bureau of Labor Statistics (LAUS) | County Level | Monthly | Not seasonally adjusted |
-| **Consumer Sentiment** | University of Michigan | National Baseline | Monthly | Not Seasonally Adjusted (NSA) |
+Metric Component | Primary Source Agency | Spatial Resolution | Update Cadence | Adjustments
+:--- | :--- | :--- | :--- | :---
+**Local Area Unemployment** | Bureau of Labor Statistics (LAUS) | County Level | Monthly | Not Seasonally Adjusted (NSA)
+**Consumer Sentiment** | University of Michigan | National Baseline | Monthly | Not Seasonally Adjusted (NSA)
