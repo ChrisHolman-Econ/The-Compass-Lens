@@ -30,32 +30,47 @@ cat("[*] Processing LAUS County & Statewide Data...\n")
 laus_county_raw <- fread(file.path(RAW_DIR, "laus_county.txt"), sep = "\t", header = TRUE, fill = TRUE)
 laus_state_raw  <- fread(file.path(RAW_DIR, "laus_state.txt"), sep = "\t", header = TRUE, fill = TRUE)
 
-# Clean up column names (BLS often has trailing spaces in headers)
-setnames(laus_raw, names(laus_raw), trimws(names(laus_raw)))
-
-# Parse the 20-character BLS LAUS Series ID
-# Combine county and state flat files
+# Combine county and state flat files cleanly
 laus_raw <- bind_rows(laus_county_raw, laus_state_raw)
 setnames(laus_raw, names(laus_raw), trimws(names(laus_raw)))
 
 laus_clean <- laus_raw %>%
+  # 1. Clean whitespace across all raw character columns first
   mutate(
     series_id = trimws(series_id),
     period    = trimws(period),
+    year      = trimws(year),
     value     = trimws(value)
   ) %>%
+  # 2. Filter out NA, blanks, and annual average M13 values
+  filter(!is.na(year) & !is.na(period) & !is.na(series_id)) %>%
+  filter(year != "" & period != "" & period != "M13") %>%
   filter(str_detect(series_id, "^LAUCN|^LAUST")) %>%
+  # 3. Extract metadata flags
   mutate(
     state_fips   = substr(series_id, 6, 7),
-    area_type    = substr(series_id, 3, 5), # "CN" for County, "ST" for State
-    county_fips  = if_else(area_type == "ST", "000", substr(series_id, 8, 10)),
+    area_type    = substr(series_id, 3, 4), # "CN" = County, "ST" = State
+    county_fips  = if_else(area_type == "CN", substr(series_id, 8, 10), NA_character_),
     measure_code = substr(series_id, 19, 20) 
   ) %>%
-  filter(state_fips == MI_FIPS & (county_fips %in% names(COUNTY_MAP) | county_fips == "000")) %>%
-  filter(period != "M13") %>% 
+  # 4. Keep target region
+  filter(state_fips == MI_FIPS & (county_fips %in% names(COUNTY_MAP) | area_type == "ST")) %>%
+  # 5. Extract month and strictly enforce valid months 01-12
   mutate(
-    county_name = if_else(county_fips == "000", "Michigan (Statewide)", COUNTY_MAP[county_fips]),
-    date = as.Date(paste(year, substr(period, 2, 3), "01", sep = "-")),
+    month_val = parse_number(period)
+  ) %>%
+  filter(!is.na(month_val) & month_val >= 1 & month_val <= 12) %>%
+  mutate(
+    county_name = case_when(
+      area_type == "ST" ~ "Michigan (Statewide)",
+      area_type == "CN" ~ COUNTY_MAP[county_fips],
+      TRUE ~ NA_character_
+    ),
+    
+    # Safely construct ISO YYYY-MM-01 string
+    month_num = str_pad(month_val, width = 2, pad = "0"),
+    date      = as.Date(paste(year, month_num, "01", sep = "-")),
+    
     metric = case_when(
       measure_code == "03" ~ "unemployment_rate",
       measure_code == "04" ~ "unemployed_count",
@@ -65,7 +80,7 @@ laus_clean <- laus_raw %>%
     ),
     value = as.numeric(value)
   ) %>%
-  filter(!is.na(metric) & !is.na(value))
+  filter(!is.na(metric) & !is.na(value) & !is.na(county_name) & !is.na(date))
 
 # 3. CLEAN & PARSE CES (CURRENT EMPLOYMENT STATISTICS)
 cat("[*] Processing CES State & Area Payrolls...\n")
@@ -102,13 +117,14 @@ laus_wide <- dcast(laus_clean, county_name + date ~ metric, value.var = "value")
   complete(date = seq.Date(min(date), max(date), by = "1 month")) %>%
   ungroup()
 
-# 2. GENERATE REGIONAL AGGREGATE (OWL CORRIDOR TOTAL)
+# 2. GENERATE REGIONAL AGGREGATE (OWL CORRIDOR TOTAL ONLY)
+# CRITICAL: Exclude 'Michigan (Statewide)' so it doesn't inflate corridor totals!
 owl_region_summary <- laus_wide %>%
+  filter(county_name != "Michigan (Statewide)") %>% 
   group_by(date) %>%
   summarize(
     county_name       = "OWL Corridor",
     
-    # Safely sum counts (returns NA if all values in that month are NA)
     labor_force       = if (all(is.na(labor_force))) NA_real_ else sum(labor_force, na.rm = TRUE),
     employed_count    = if (all(is.na(employed_count))) NA_real_ else sum(employed_count, na.rm = TRUE),
     unemployed_count  = if (all(is.na(unemployed_count))) NA_real_ else sum(unemployed_count, na.rm = TRUE),
@@ -119,7 +135,7 @@ owl_region_summary <- laus_wide %>%
     .groups = "drop"
   )
 
-# 3. Combine individual counties with regional aggregate
+# 3. Combine individual counties, statewide baseline, and regional aggregate
 laus_wide <- bind_rows(laus_wide, owl_region_summary)
 
 # 4. Pivot CES to wide structure (RESOVED BUG: Restored missing ces_wide block)
