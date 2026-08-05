@@ -26,29 +26,35 @@ COUNTY_MAP <- c(
 )
 
 # 2. CLEAN & PARSE LAUS (LOCAL AREA UNEMPLOYMENT STATISTICS)
-cat("[*] Processing LAUS County Data...\n")
-laus_raw <- fread(file.path(RAW_DIR, "laus_county.txt"), sep = "\t", header = TRUE, fill = TRUE)
+cat("[*] Processing LAUS County & Statewide Data...\n")
+laus_county_raw <- fread(file.path(RAW_DIR, "laus_county.txt"), sep = "\t", header = TRUE, fill = TRUE)
+laus_state_raw  <- fread(file.path(RAW_DIR, "laus_state.txt"), sep = "\t", header = TRUE, fill = TRUE)
 
 # Clean up column names (BLS often has trailing spaces in headers)
 setnames(laus_raw, names(laus_raw), trimws(names(laus_raw)))
 
 # Parse the 20-character BLS LAUS Series ID
+# Combine county and state flat files
+laus_raw <- bind_rows(laus_county_raw, laus_state_raw)
+setnames(laus_raw, names(laus_raw), trimws(names(laus_raw)))
+
 laus_clean <- laus_raw %>%
   mutate(
     series_id = trimws(series_id),
     period    = trimws(period),
     value     = trimws(value)
   ) %>%
-  filter(str_detect(series_id, "^LAUCN")) %>%
+  filter(str_detect(series_id, "^LAUCN|^LAUST")) %>%
   mutate(
     state_fips   = substr(series_id, 6, 7),
-    county_fips  = substr(series_id, 8, 10),
+    area_type    = substr(series_id, 3, 5), # "CN" for County, "ST" for State
+    county_fips  = if_else(area_type == "ST", "000", substr(series_id, 8, 10)),
     measure_code = substr(series_id, 19, 20) 
   ) %>%
-  filter(state_fips == MI_FIPS & county_fips %in% names(COUNTY_MAP)) %>%
+  filter(state_fips == MI_FIPS & (county_fips %in% names(COUNTY_MAP) | county_fips == "000")) %>%
   filter(period != "M13") %>% 
   mutate(
-    county_name = COUNTY_MAP[county_fips],
+    county_name = if_else(county_fips == "000", "Michigan (Statewide)", COUNTY_MAP[county_fips]),
     date = as.Date(paste(year, substr(period, 2, 3), "01", sep = "-")),
     metric = case_when(
       measure_code == "03" ~ "unemployment_rate",

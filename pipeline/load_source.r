@@ -32,9 +32,11 @@ data_manifest <- list(
   # Local Area Unemployment Statistics (All US Counties)
   laus_county = "https://download.bls.gov/pub/time.series/la/la.data.64.County",
   
+  # Local Area Unemployment Statistics (Statewide Track)
+  laus_state  = "https://download.bls.gov/pub/time.series/la/la.data.2.AllStates",
+  
   # Current Employment Statistics (State & Metro Area Payrolls)
   ces_state_area = "https://download.bls.gov/pub/time.series/sm/sm.data.1.AllData",
-  
   # Job Openings and Labor Turnover Survey (Regional/National Tracks)
   jolts_regional = "https://download.bls.gov/pub/time.series/jt/jt.data.1.AllItems",
   
