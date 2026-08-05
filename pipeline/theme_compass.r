@@ -5,32 +5,32 @@
 # 1. CENTRALIZED BRAND PALETTE
 # Master Brand Palette for Counties & Regional Benchmarks
 COMPASS_PALETTE <- c(
-  "OWL Corridor" = "#6B21A8", # Plum Purple (Subtle Regional Aggregate)
-  "Washtenaw"    = "#00274C", # Michigan Navy (U of M Anchor)
-  "Oakland"      = "#15803D", # Forest Green (County Baseline)
-  "Livingston"   = "#C2410C", # Institutional Burnt Orange (Brighton Anchor)
-  "Michigan"     = "#475569", # Muted Slate (Macro Benchmark)
-  "United States"= "#94A3B8"  # Cool Gray (National Baseline)
+  "OWL Corridor"        = "#6B21A8", # Plum Purple (Subtle Regional Aggregate)
+  "Washtenaw"           = "#00274C", # Michigan Navy (U of M Anchor)
+  "Oakland"             = "#15803D", # Forest Green (County Baseline)
+  "Livingston"          = "#C2410C", # Institutional Burnt Orange (Brighton Anchor)
+  "Michigan (Statewide)"= "#475569", # Muted Slate (Macro Benchmark)
+  "United States"       = "#94A3B8"  # Cool Gray (National Baseline)
 )
 
 # Define Line Styles
 owl_linetypes <- c(
-  "OWL Corridor" = "solid",
-  "Washtenaw"    = "solid",
-  "Oakland"      = "solid",
-  "Livingston"   = "solid",
-  "Michigan"     = "dashed",
-  "United States"= "dotted"
+  "OWL Corridor"        = "solid",
+  "Washtenaw"           = "solid",
+  "Oakland"             = "solid",
+  "Livingston"          = "solid",
+  "Michigan (Statewide)"= "dashed",
+  "United States"       = "dotted"
 )
 
 # Line Width Hierarchy
 owl_widths <- c(
-  "OWL Corridor" = 1.2,  # Thicker line to draw the eye
-  "Washtenaw"    = 0.9,
-  "Oakland"      = 0.9,
-  "Livingston"   = 0.9,
-  "Michigan"     = 0.8,
-  "United States"= 0.8
+  "OWL Corridor"        = 1.2,  # Thicker line to draw the eye
+  "Washtenaw"           = 0.9,
+  "Oakland"             = 0.9,
+  "Livingston"          = 0.9,
+  "Michigan (Statewide)"= 0.8,
+  "United States"       = 0.8
 )
 
 # 2. CUSTOM THEME FUNCTION FOR REUSE

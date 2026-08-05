@@ -32,12 +32,18 @@ PLOT_DIR      <- here("plots")
 
 master_data <- read_rds(file.path(PROCESSED_DIR, "master_county_pulse.rds"))
 
-# 4. Process the remaining pipeline variables
-latest_date     <- max(master_data$date)
+# Process the date tracking variables
+latest_date     <- max(master_data$date, na.rm = TRUE)
 latest_date_str <- format(latest_date, "%B %Y")
 
+# Isolate snapshot to the absolute latest month
 latest_snapshot <- master_data %>% 
   filter(date == latest_date)
+
+# Extract scalar rates for the latest month using latest_snapshot
+owl_rate   <- latest_snapshot %>% filter(county_name == "OWL Corridor") %>% pull(unemployment_rate)
+state_rate <- latest_snapshot %>% filter(county_name == "Michigan (Statewide)") %>% pull(unemployment_rate)
+rate_gap   <- state_rate - owl_rate
 ``` 
 
 ## Executive Summary
@@ -61,7 +67,7 @@ The chart below outlines the regional unemployment rate for each of the member c
 ### Core Unemployment Takeaways
 
 * **Structural Stabilization:** Typically, Livingston County exhibits the lowest unemployment rate, followed by Oakland and Washtenaw counties. The post-pandemic normalization of unemployment rates across the corridor is evident, with all three counties converging toward historical baselines. Recently the rates have increased slightly across the corridor, but remaining inline with the historical range since mid 2024. 
-* **Corridor Alignment:** The unemployment rate for the counties of the OWL Corridor moves in unision with the regional rate, suggesting that the corridor is a cohesive labor market unit. The corridor's unemployment rate is currently at **`r round(latest_snapshot$unemployment_rate[latest_snapshot$county == "OWL Corridor"], 1)`%**, which is **`r round(latest_snapshot$unemployment_rate[latest_snapshot$county == "OWL Corridor"] - latest_snapshot$unemployment_rate[latest_snapshot$county == "Michigan"], 1)`%** below the state average of **`r round(latest_snapshot$unemployment_rate[latest_snapshot$county == "Michigan"], 1)`%**.
+* **Corridor Alignment:** The unemployment rate for the counties of the OWL Corridor moves in unison with the regional rate, suggesting that the corridor is a cohesive labor market unit. The corridor's unemployment rate is currently at **`r round(owl_rate, 1)`%**, which is **`r round(rate_gap, 1)`%** below the state average of **`r round(state_rate, 1)`%**.
 
 :::
 
