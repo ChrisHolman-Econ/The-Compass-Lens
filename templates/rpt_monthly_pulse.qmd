@@ -84,8 +84,8 @@ To observe true relative resource scaling, local labor supply capacities are ind
 ![Labor Force Capacity: Indexed growth trends relative to the January 2022 baseline.](../plots/laus_labor_force_indexed_12ma.png){#fig-laborforce width=100%}
 
 ### Core Labor Force Takeaways
-* **Indexed Growth:** The labor force for all three counties in the OWL Corridor has expanded since January 2022. Washtenaw County has experienced more pronounced swings in its labor force compared to the other counties of the corridor.
-* **Relative Velocity:** A monthly analysis of the labor force  would suggest that Washtenaw County is diverting from the corridor trend, with a decline relative to the other counties. The 12-month moving average index shows that Washtenaw is instead returning to parity with the corridor trend, suggesting that the county is returning to a more normalized labor market after a period of increased labor market involvement.
+* **Indexed Growth:** The labor force for all three counties in the OWL Corridor has expanded since January 2022. Washtenaw County has experienced more pronounced swings in its labor force compared to the other counties of the corridor. Oakland and Livingston counties appear to have lagged behind Washtenaw and the statewide trends through early 2025. Current analysis suggests these counties are returning to parity with Washtenaw and the state by maintaining their momentum as the labor force of Washtenaw and the state have cooled.  
+* **Relative Velocity:** A monthly analysis of the labor force  would suggest that Washtenaw County has moved in tadnum with the statewide trend but is diverging from the rest of the corridor. The 12-month moving average index shows that Washtenaw is instead returning to parity with the corridor trend, suggesting that the county is returning to a more normalized labor market after a period of increased labor market involvement.
 
 :::
 

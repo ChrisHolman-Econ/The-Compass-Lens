@@ -43,7 +43,7 @@ theme_compass <- function(base_size = 11) {
       plot.caption  = element_text(size = 8, color = "gray50", hjust = 1, margin = margin(t = 10)),
       
       # Legend Configuration
-      legend.position = "top",
+      legend.position = "bottom",
       legend.title    = element_text(size = 9.5, face = "bold", color = "#1B365D"),
       legend.text     = element_text(size = 9, color = "black"),
       

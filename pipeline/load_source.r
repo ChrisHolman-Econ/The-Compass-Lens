@@ -32,16 +32,16 @@ data_manifest <- list(
   # Local Area Unemployment Statistics (All US Counties)
   laus_county = "https://download.bls.gov/pub/time.series/la/la.data.64.County",
   
-  # Local Area Unemployment Statistics (Statewide Track)
-  laus_state  = "https://download.bls.gov/pub/time.series/la/la.data.2.AllStates",
+  # Local Area Unemployment Statistics (Statewide Track - Fixed URL)
+  laus_state  = "https://download.bls.gov/pub/time.series/la/la.data.2.AllStatesU",
   
   # Current Employment Statistics (State & Metro Area Payrolls)
   ces_state_area = "https://download.bls.gov/pub/time.series/sm/sm.data.1.AllData",
+  
   # Job Openings and Labor Turnover Survey (Regional/National Tracks)
   jolts_regional = "https://download.bls.gov/pub/time.series/jt/jt.data.1.AllItems",
   
   # Quarterly Census of Employment and Wages (Michigan 2025/2026 Baseline)
-  # Note: QCEW flat time-series uses 'en'. We capture the complete national track.
   qcew_structural = "https://download.bls.gov/pub/time.series/en/en.data.1.AllData"
 )
 
@@ -74,15 +74,16 @@ for (dataset_name in names(data_manifest)) {
       quiet    = FALSE
     )
     
-    # 2. Instantly read the downloaded local text file into an R data.frame/data.table
-    # fill = TRUE handles any trailing whitespace anomalies in raw BLS files cleanly
+    # 2. Read local file into data.table
     dt_cache <- fread(destination_path, sep = "\t", header = TRUE, fill = TRUE)
+    
+    # 3. Clean column headers (strips leading/trailing whitespace from BLS fields)
+    setnames(dt_cache, names(dt_cache), trimws(names(dt_cache)))
     
     cat(paste0(" [✓] Loaded into memory: ", dataset_name, " matrix (", nrow(dt_cache), " rows)\n\n"))
     
-    # Optional: If you want to keep the data frames explicitly alive in your current 
-    # R global environment loop, you can assign them dynamically:
-    # assign(paste0("raw_", dataset_name), dt_cache, envir = .GlobalEnv)
+    # 4. Assign data frames into global memory as laus_county_raw, laus_state_raw, etc.
+    assign(paste0(dataset_name, "_raw"), dt_cache, envir = .GlobalEnv)
     
   }, error = function(e) {
     cat(paste0(" [❌] R Extraction Error on: ", dataset_name, "\n"))
@@ -95,12 +96,9 @@ for (dataset_name in names(data_manifest)) {
 # ------------------------------------------------------------------------------
 cat("[*] Extracting University of Michigan Consumer Sentiment Index via FRED...\n")
 
-# Setup FRED request strings
-# Series ID 'UMCSENT' tracks the core University of Michigan Sentiment value
 FRED_API_KEY <- Sys.getenv("FRED_API_KEY") 
 
 if (FRED_API_KEY == "") {
-  # Fallback: Pull directly from the open CSV web export if no API token is stored
   sentiment_url <- "https://fred.stlouisfed.org/graph/fredgraph.csv?id=UMCSENT"
   cat("     ! No local FRED_API_KEY detected in .Renviron. Falling back to public URL.\n")
 } else {
@@ -112,7 +110,6 @@ tryCatch({
   if (grepl("csv", sentiment_url)) {
     sentiment_data <- fread(sentiment_url)
   } else {
-    # If using JSON API, import jsonlite on the fly to unpack the observation nodes
     if (!requireNamespace("jsonlite", quietly = TRUE)) install.packages("jsonlite")
     raw_json <- jsonlite::fromJSON(sentiment_url)
     sentiment_data <- as.data.table(raw_json$observations)

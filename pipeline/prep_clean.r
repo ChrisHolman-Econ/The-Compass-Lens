@@ -30,44 +30,41 @@ cat("[*] Processing LAUS County & Statewide Data...\n")
 laus_county_raw <- fread(file.path(RAW_DIR, "laus_county.txt"), sep = "\t", header = TRUE, fill = TRUE)
 laus_state_raw  <- fread(file.path(RAW_DIR, "laus_state.txt"), sep = "\t", header = TRUE, fill = TRUE)
 
-# Combine county and state flat files cleanly
-laus_raw <- bind_rows(laus_county_raw, laus_state_raw)
-setnames(laus_raw, names(laus_raw), trimws(names(laus_raw)))
+# Clean headers
+setnames(laus_county_raw, names(laus_county_raw), trimws(names(laus_county_raw)))
+setnames(laus_state_raw, names(laus_state_raw), trimws(names(laus_state_raw)))
 
+# Combine raw tables
+laus_raw <- bind_rows(laus_county_raw, laus_state_raw)
+
+# Clean and filter
 laus_clean <- laus_raw %>%
-  # 1. Clean whitespace across all raw character columns first
   mutate(
     series_id = trimws(series_id),
     period    = trimws(period),
     year      = trimws(year),
     value     = trimws(value)
   ) %>%
-  # 2. Filter out NA, blanks, and annual average M13 values
   filter(!is.na(year) & !is.na(period) & !is.na(series_id)) %>%
   filter(year != "" & period != "" & period != "M13") %>%
-  filter(str_detect(series_id, "^LAUCN|^LAUST")) %>%
-  # 3. Extract metadata flags
-  mutate(
-    state_fips   = substr(series_id, 6, 7),
-    area_type    = substr(series_id, 3, 4), # "CN" = County, "ST" = State
-    county_fips  = if_else(area_type == "CN", substr(series_id, 8, 10), NA_character_),
-    measure_code = substr(series_id, 19, 20) 
-  ) %>%
-  # 4. Keep target region
-  filter(state_fips == MI_FIPS & (county_fips %in% names(COUNTY_MAP) | area_type == "ST")) %>%
-  # 5. Extract month and strictly enforce valid months 01-12
-  mutate(
-    month_val = parse_number(period)
-  ) %>%
-  filter(!is.na(month_val) & month_val >= 1 & month_val <= 12) %>%
+  
+  # Identify state and county FIPS patterns
   mutate(
     county_name = case_when(
-      area_type == "ST" ~ "Michigan (Statewide)",
-      area_type == "CN" ~ COUNTY_MAP[county_fips],
+      str_detect(series_id, "26093") ~ "Livingston",
+      str_detect(series_id, "26125") ~ "Oakland",
+      str_detect(series_id, "26161") ~ "Washtenaw",
+      str_detect(series_id, "26000|ST26") ~ "Michigan (Statewide)",
       TRUE ~ NA_character_
     ),
-    
-    # Safely construct ISO YYYY-MM-01 string
+    measure_code = str_sub(series_id, -2, -1)
+  ) %>%
+  filter(!is.na(county_name)) %>%
+  
+  # Parse dates and numeric metrics
+  mutate(month_val = parse_number(period)) %>%
+  filter(!is.na(month_val) & month_val >= 1 & month_val <= 12) %>%
+  mutate(
     month_num = str_pad(month_val, width = 2, pad = "0"),
     date      = as.Date(paste(year, month_num, "01", sep = "-")),
     
@@ -78,10 +75,10 @@ laus_clean <- laus_raw %>%
       measure_code == "06" ~ "labor_force",
       TRUE ~ NA_character_
     ),
-    value = as.numeric(value)
+    value = suppressWarnings(as.numeric(value))
   ) %>%
-  filter(!is.na(metric) & !is.na(value) & !is.na(county_name) & !is.na(date))
-
+  filter(!is.na(metric) & !is.na(value) & !is.na(date))
+  
 # 3. CLEAN & PARSE CES (CURRENT EMPLOYMENT STATISTICS)
 cat("[*] Processing CES State & Area Payrolls...\n")
 ces_raw <- fread(file.path(RAW_DIR, "ces_state_area.txt"), sep = "\t", header = TRUE, fill = TRUE)
