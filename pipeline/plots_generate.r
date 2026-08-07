@@ -83,22 +83,23 @@ latest_ur_dots <- ur_data %>%
 
 # Define alpha/transparency hierarchy in your plot setup
 owl_alphas <- c(
-  "Livingston"         = 0.45,
-  "Oakland"            = 0.45,
-  "Washtenaw"          = 0.45,
-  "OWL Corridor" = 1.00   # Hero line stays fully opaque
+  "Livingston"            = 0.75,
+  "Oakland"               = 0.75,
+  "Washtenaw"             = 0.75,
+  "Michigan (Statewide)"  = 0.45,
+  "OWL Corridor"          = 1.00   # Hero line stays fully opaque
 )
 
 p_ur <- ggplot(ur_data, aes(
-  x = date, 
-  y = value, 
-  color = county_name, 
-  linetype = county_name, 
+  x         = date, 
+  y         = value, 
+  color     = county_name, 
+  linetype  = county_name, 
   linewidth = county_name,
-  alpha = county_name   # Add alpha mapping
+  alpha     = county_name
 )) +
   geom_line(na.rm = FALSE) +
-  geom_point(data = latest_ur_dots, size = 2.5, show.legend = FALSE) +
+  geom_point(data = latest_ur_dots, size = 1.5, show.legend = FALSE) +
   
   scale_y_continuous(labels = label_percent(scale = 1), breaks = seq(0, 10, by = 1)) +
   scale_x_date(date_breaks = "6 months", date_labels = "%b '%y") +
@@ -106,17 +107,24 @@ p_ur <- ggplot(ur_data, aes(
   scale_color_manual(values = COMPASS_PALETTE) +
   scale_linetype_manual(values = owl_linetypes) +
   scale_linewidth_manual(values = owl_widths) +
-  scale_alpha_manual(values = owl_alphas) +  # Applies the muted county effect
+  scale_alpha_manual(values = owl_alphas) +
   
   labs(
     title    = "Unemployment Rate Trajectories: OWL Corridor",
     subtitle = "Post-pandemic structural labor market normalization (Jan 2022 - Present)",
     y        = "Unemployment Rate",
-    color    = "Area",
-    linetype = "Area",
-    linewidth= "Area",
-    alpha    = "Area",  # Merges alpha seamlessly into the main legend
+    color    = NULL,
+    linetype = NULL,
+    linewidth= NULL,
+    alpha    = NULL,
     caption  = "Source: Bureau of Labor Statistics (LAUS, NSA) | Processed via The Compass Lens"
+  ) +
+  # Force all 4 aesthetics into a single legend row
+  guides(
+    color     = guide_legend(nrow = 1),
+    linetype  = guide_legend(nrow = 1),
+    linewidth = guide_legend(nrow = 1),
+    alpha     = guide_legend(nrow = 1)
   ) +
   theme_compass()
 
@@ -145,12 +153,19 @@ latest_lf_dots <- indexed_lf %>%
   filter(date == max(date)) %>%
   ungroup()
 
-p_lf <- ggplot(indexed_lf, aes(x = date, y = indexed_val, color = county_name, linetype = county_name, linewidth = county_name)) +
+p_lf <- ggplot(indexed_lf, aes(
+  x = date, 
+  y = indexed_val, 
+  color = county_name, 
+  linetype = county_name, 
+  linewidth = county_name, 
+  alpha = county_name
+  )) +
   geom_hline(yintercept = 100, linetype = "dashed", color = "gray50", linewidth = 0.5) +
   
   # PASS FULL DATASET: ggplot2 automatically leaves a visual gap at NA (Oct 2025)
-  geom_line(alpha = 0.95, na.rm = FALSE) +
-  geom_point(data = latest_lf_dots, size = 2.5, show.legend = FALSE) +
+  geom_line(na.rm = FALSE) +
+  geom_point(data = latest_lf_dots, size = 1.5, show.legend = FALSE) +
   
   scale_y_continuous(labels = label_number(accuracy = 1)) +
   scale_x_date(date_breaks = "6 months", date_labels = "%b '%y") +
@@ -158,15 +173,24 @@ p_lf <- ggplot(indexed_lf, aes(x = date, y = indexed_val, color = county_name, l
   scale_color_manual(values = COMPASS_PALETTE) +
   scale_linetype_manual(values = owl_linetypes) +
   scale_linewidth_manual(values = owl_widths) +
+  scale_alpha_manual(values = owl_alphas) +
   
   labs(
     title    = "Labor Force Expansion Trends (12-Month Moving Average)",
     subtitle = "Relative capacity shifts, indexed to smoothed January 2022 baseline = 100",
     y        = "Indexed Growth Baseline",
-    color    = "Area",
-    linetype = "Area",
-    linewidth= "Area",
+    color    = NULL,
+    linetype = NULL,
+    linewidth= NULL,
+    alpha    = NULL,
     caption  = "Source: Bureau of Labor Statistics (LAUS, NSA) | 12-MA & Indexing via The Compass Lens"
+  ) +
+  # Force all 4 aesthetics into a single legend row
+  guides(
+    color     = guide_legend(nrow = 1),
+    linetype  = guide_legend(nrow = 1),
+    linewidth = guide_legend(nrow = 1),
+    alpha     = guide_legend(nrow = 1)
   ) +
   theme_compass()
 
