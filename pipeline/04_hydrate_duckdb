@@ -1,0 +1,92 @@
+# ==============================================================================
+# SCRIPT:  04_hydrate_duckdb.R
+# PURPOSE: Phase 2 (Load): Read raw landing assets from data/raw/ (FRED, 
+#          Census, BLS) and hydrate DuckDB staging tables.
+# SYSTEM:  The Compass Lens Architecture
+# ==============================================================================
+
+library(tidyverse)
+library(data.table)
+library(DBI)
+library(duckdb)
+library(here)
+
+# ------------------------------------------------------------------------------
+# 1. PATH SAFETIES & DATABASE CONNECTION
+# ------------------------------------------------------------------------------
+DB_DIR  <- here::here("data", "db")
+DB_PATH <- here::here("data", "db", "glce_econ_warehouse.duckdb")
+
+if (!dir.exists(DB_DIR)) dir.create(DB_DIR, recursive = TRUE)
+
+message("========================================================")
+message("HYDRATING DUCKDB WAREHOUSE: ", DB_PATH)
+message("========================================================\n")
+
+con <- dbConnect(duckdb::duckdb(), dbdir = DB_PATH, read_only = FALSE)
+
+# ------------------------------------------------------------------------------
+# 2. HYDRATE FRED MACRO STAGING TABLE
+# ------------------------------------------------------------------------------
+fred_rds_path <- here::here("data", "raw", "fred", "raw_fred.rds")
+
+if (file.exists(fred_rds_path)) {
+  message("[*] Hydrating table: 'stg_fred_macro'...")
+  raw_fred <- readRDS(fred_rds_path)
+  
+  dbWriteTable(con, "stg_fred_macro", raw_fred, overwrite = TRUE)
+  message(sprintf(" [✓] 'stg_fred_macro' loaded (%s rows)", 
+                  format(nrow(raw_fred), big.mark = ",")))
+} else {
+  message(" [⚠️] Warning: 'raw_fred.rds' not found in data/raw/fred/. Skipping.")
+}
+
+# ------------------------------------------------------------------------------
+# 3. HYDRATE CENSUS ACS STAGING TABLE
+# ------------------------------------------------------------------------------
+census_rds_path <- here::here("data", "raw", "census", "raw_census.rds")
+
+if (file.exists(census_rds_path)) {
+  message("\n[*] Hydrating table: 'stg_census_acs'...")
+  raw_census <- readRDS(census_rds_path)
+  
+  dbWriteTable(con, "stg_census_acs", raw_census, overwrite = TRUE)
+  message(sprintf(" [✓] 'stg_census_acs' loaded (%s rows)", 
+                  format(nrow(raw_census), big.mark = ",")))
+} else {
+  message(" [⚠️] Warning: 'raw_census.rds' not found in data/raw/census/. Skipping.")
+}
+
+# ------------------------------------------------------------------------------
+# 4. HYDRATE BLS FLAT-FILE STAGING TABLES
+# ------------------------------------------------------------------------------
+bls_raw_dir <- here::here("data", "raw", "bls")
+bls_files   <- list.files(bls_raw_dir, pattern = "\\.txt$", full.names = TRUE)
+
+if (length(bls_files) > 0) {
+  message("\n[*] Hydrating BLS flat-file tables...")
+  
+  for (file in bls_files) {
+    file_stub  <- tools::file_path_sans_ext(basename(file))
+    table_name <- paste0("stg_bls_", file_stub)
+    
+    # Fast-read flat file, trimming whitespace around field header strings
+    dt_raw <- fread(file, sep = "\t", header = TRUE, fill = TRUE, quote = "")
+    setnames(dt_raw, names(dt_raw), trimws(names(dt_raw)))
+    
+    dbWriteTable(con, table_name, dt_raw, overwrite = TRUE)
+    message(sprintf(" [✓] Table '%-25s' loaded (%s rows)", 
+                    table_name, format(nrow(dt_raw), big.mark = ",")))
+  }
+} else {
+  message(" [⚠️] Warning: No BLS .txt flat files found in data/raw/bls/. Skipping.")
+}
+
+# ------------------------------------------------------------------------------
+# 5. DISCONNECT & SHUTDOWN WAREHOUSE CONNECTION
+# ------------------------------------------------------------------------------
+dbDisconnect(con, shutdown = TRUE)
+
+message("\n========================================================")
+message(" PIPELINE STEP 04 COMPLETE: DUCKDB STAGING HYDRATED")
+message("========================================================")
