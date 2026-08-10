@@ -86,23 +86,22 @@ dbExecute(con, "CREATE OR REPLACE VIEW vw_laus_county_clean AS
 WITH base AS (
   SELECT 
     series_id,
-    -- Extract FIPS county code from BLS series ID (character positions 6 to 10)
+    -- Extract 5-digit county FIPS (character positions 6 to 10)
     SUBSTRING(series_id, 6, 5) AS county_fips,
     CAST(year AS INTEGER) AS year,
     CAST(REPLACE(period, 'M', '') AS INTEGER) AS month,
     MAKE_DATE(CAST(year AS INTEGER), CAST(REPLACE(period, 'M', '') AS INTEGER), 1) AS observation_date,
-    -- Map measure code suffixes (03=Unemployment Rate, 04=Unemployed, 05=Employed, 06=Labor Force)
-    CASE SUBSTRING(series_id, 18, 2)
-      WHEN '03' THEN 'unemployment_rate'
-      WHEN '04' THEN 'unemployed_count'
-      WHEN '05' THEN 'employed_count'
-      WHEN '06' THEN 'labor_force'
+    -- Map BLS 2-digit measure suffixes to human-readable categories
+    CASE RIGHT(series_id, 2)
+      WHEN '03' THEN 'Unemployment Rate'
+      WHEN '04' THEN 'Unemployment'
+      WHEN '05' THEN 'Employment'
+      WHEN '06' THEN 'Labor Force'
       ELSE 'other'
     END AS measure_type,
     TRY_CAST(TRIM(value) AS DOUBLE) AS value
   FROM stg_bls_laus_county
-  WHERE period LIKE 'M%' 
-    AND period != 'M13' -- Exclude annual averages
+  WHERE period != 'M13' -- Exclude annual averages if present
 )
 SELECT 
   series_id,
@@ -112,13 +111,11 @@ SELECT
   observation_date,
   measure_type,
   value,
-  -- 12-Month Moving Average across current and prior 11 months
-  ROUND(
-    AVG(value) OVER (
-      PARTITION BY county_fips, measure_type 
-      ORDER BY observation_date 
-      ROWS BETWEEN 11 PRECEDING AND CURRENT ROW
-    ), 2
+  -- Calculate 12-Month Moving Average over clean observation dates
+  AVG(value) OVER (
+    PARTITION BY series_id 
+    ORDER BY observation_date 
+    ROWS BETWEEN 11 PRECEDING AND CURRENT ROW
   ) AS value_12mma
 FROM base;")
 
