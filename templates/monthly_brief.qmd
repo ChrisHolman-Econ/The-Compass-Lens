@@ -1,0 +1,95 @@
+---
+title: "OWL Corridor Monthly Economic Briefing"
+subtitle: "Regional Labor Force, Employment Dynamics & Consumer Price Indicators"
+author: "The Compass Lens Architecture | Michigan Center for Data and Analytics"
+date: today
+date-format: "MMMM YYYY"
+format:
+  pdf:
+    toc: false
+    number-sections: false
+    colorlinks: true
+    geometry:
+      - top=0.75in
+      - bottom=0.75in
+      - left=0.75in
+      - right=0.75in
+    header-includes:
+      - \usepackage{fancyhdr}
+      - \pagestyle{fancy}
+      - \fancyhead[L]{\small \textbf{OWL Corridor Monthly Economic Briefing}}
+      - \fancyhead[R]{\small \rightmark}
+      - \fancyfoot[C]{\thepage}
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup-env
+#| include: false
+
+library(here)
+library(knitr)
+library(tidyverse)
+
+# Load pre-calculated inline report variables
+vars_path <- here::here("data", "report_vars.rds")
+
+if (file.exists(vars_path)) {
+  report_vars <- readRDS(vars_path)
+} else {
+  # Fallback structure if script hasn't populated data yet
+  report_vars <- list(
+    current_month    = "Latest Available",
+    washtenaw_unemp  = "N/A",
+    oakland_unemp    = "N/A",
+    livingston_unemp = "N/A",
+    mi_unemp         = "N/A",
+    detroit_cpi_yoy  = "N/A",
+    ui_claims_total  = "N/A"
+  )
+}
+```
+
+::: {.callout-note appearance="simple" icon="false"}
+
+
+## Executive Summary (`r report_vars$current_month`)
+
+- **Unemployment Rates:** Washtenaw County recorded an unemployment rate of **`r report_vars$washtenaw_unemp`%**, compared to **`r report_vars$oakland_unemp`%** in Oakland County and **`r report_vars$livingston_unemp`%** in Livingston County. Statewide Michigan benchmark stands at **`r report_vars$mi_unemp`%**.
+
+- **Price Inflation:** Metro Detroit CPI-U posted a year-over-year change of **`r report_vars$detroit_cpi_yoy`%**.
+
+- **Labor Market Drag:** Weekly initial unemployment insurance claims across the corridor totaled **`r report_vars$ui_claims_total`**.
+  :::
+
+## 1. Labor Force & Regional Unemployment
+
+The Local Area Unemployment Statistics (LAUS) program tracks labor supply trends across Washtenaw, Oakland, and Livingston (OWL) counties.
+
+![Regional Unemployment Rate Trajectories (LAUS)](`r here::here("plots", "monthly_owl_unemployment.png")`){#fig-laus fig-align="center" width=100%}
+
+## 2. Metro Detroit Payroll Employment Trends
+
+Current Employment Statistics (CES) track nonfarm payroll job trends across the Detroit-Warren-Dearborn Metropolitan Statistical Area (MSA).
+
+![Metro Detroit Payroll Growth Index (Jan 2021 = 100)](`r here::here("plots", "monthly_ces_employment_index.png")`){#fig-ces fig-align="center" width=100%}
+
+## 3. Consumer Price Index & Local Inflation
+
+Regional inflation dynamics measure purchasing power trajectory for urban consumers across the Metro Detroit region.
+
+![Detroit MSA Year-over-Year Inflation Rates (CPI-U)](`r here::here("plots", "monthly_cpi_inflation.png")`){#fig-cpi fig-align="center" width=100%}
+
+## 4. Initial Unemployment Insurance Claims
+
+Weekly initial UI filings serve as a key leading indicator for regional labor market friction and workforce dislocations.
+
+![Weekly Initial UI Claims across OWL Corridor Counties](`r here::here("plots", "monthly_ui_claims.png")`){#fig-ui fig-align="center" width=100%}
+
+::: {.text-muted style="font-size: 0.8em;"}
+**Data Sources:** U.S. Bureau of Labor Statistics (LAUS, CES, CPI-U) and Michigan Department of Labor and Economic Opportunity (LEO). Compiled automatically via *The Compass Lens Architecture*.
+:::
+

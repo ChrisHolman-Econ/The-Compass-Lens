@@ -1,0 +1,87 @@
+---
+title: "OWL Corridor Quarterly Economic Review"
+subtitle: "Industry Employment Structure, Wage Trajectories & Location Quotients"
+author: "The Compass Lens Architecture | Michigan Center for Data and Analytics"
+date: today
+date-format: "YYYY [Q]Q"
+format:
+  pdf:
+    toc: false
+    number-sections: false
+    colorlinks: true
+    geometry:
+      - top=0.75in
+      - bottom=0.75in
+      - left=0.75in
+      - right=0.75in
+    header-includes:
+      - \usepackage{fancyhdr}
+      - \pagestyle{fancy}
+      - \fancyhead[L]{\small \textbf{OWL Corridor Quarterly Economic Review}}
+      - \fancyhead[R]{\small \rightmark}
+      - \fancyfoot[C]{\thepage}
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup-env
+#| include: false
+
+library(here)
+library(knitr)
+library(tidyverse)
+
+# Load pre-calculated inline quarterly report variables
+vars_path <- here::here("data", "report_vars.rds")
+
+if (file.exists(vars_path)) {
+  report_vars <- readRDS(vars_path)
+} else {
+  # Fallback structure if script hasn't populated data yet
+  report_vars <- list(
+    current_quarter      = "Latest Available",
+    top_lq_industry      = "Automotive & Advanced Manufacturing",
+    top_lq_score         = "N/A",
+    total_qcew_emp       = "N/A",
+    avg_weekly_wage      = "N/A",
+    yoy_wage_growth      = "N/A"
+  )
+}
+```
+
+:::: {.callout-note appearance="simple" icon="false"}
+## Executive Summary (`r report_vars$current_quarter`)
+
+- **Total Covered Payrolls:** Total QCEW employment across the OWL Corridor stood at **`r report_vars$total_qcew_emp`** jobs.
+
+- **Wage Dynamics:** Average weekly wages across all covered industries reached **\$`r report_vars$avg_weekly_wage`**, representing a year-over-year change of **`r report_vars$yoy_wage_growth`%**.
+
+- **Regional Specialization:** The strongest industry concentration across the corridor remains **`r report_vars$top_lq_industry`** with a Location Quotient of **`r report_vars$top_lq_score`**.
+
+  :::
+
+## 1. Industry Sector Employment Trajectories
+
+The Quarterly Census of Employment and Wages (QCEW) provides near-universe coverage of employment and payrolls, revealing structural shifts across key NAICS industry sectors.
+
+![Quarterly Employment Levels by Key Industry Sector](`r here::here("plots", "quarterly_qcew_employment.png")`){#fig-qcew-emp fig-align="center" width=100%}
+
+## 2. Average Weekly Wage Growth Dynamics
+
+Weekly wage trends highlight purchasing power changes and labor cost structures across county jurisdictions and major industry clusters.
+
+![Average Weekly Wages and Year-over-Year Growth Trajectories](`r here::here("plots", "quarterly_wage_growth.png")`){#fig-wages fig-align="center" width=100%}
+
+## 3. Industrial Concentration & Location Quotients (LQs)
+
+Location Quotients measure regional industry concentration relative to national benchmarks ($LQ > 1.0$ indicates export-oriented regional specialization).
+
+![Location Quotients for Key Industry Sectors Across OWL Corridor Counties](`r here::here("plots", "quarterly_industry_lq.png")`){#fig-lq fig-align="center" width=100%}
+
+::: {.text-muted style="font-size: 0.8em;"}
+**Data Sources:** U.S. Bureau of Labor Statistics (QCEW) via Michigan Center for Data and Analytics. Location quotients calculated relative to U.S. baseline aggregates. Compiled automatically via *The Compass Lens Architecture*.
+:::
+

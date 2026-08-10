@@ -1,0 +1,85 @@
+---
+title: "OWL Corridor Annual Economic Benchmark"
+subtitle: "Structural Demographics, Income Dynamics & Long-Term Economic Trajectories"
+author: "The Compass Lens Architecture | Michigan Center for Data and Analytics"
+date: today
+date-format: "YYYY"
+format:
+  pdf:
+    toc: false
+    number-sections: false
+    colorlinks: true
+    geometry:
+      - top=0.75in
+      - bottom=0.75in
+      - left=0.75in
+      - right=0.75in
+    header-includes:
+      - \usepackage{fancyhdr}
+      - \pagestyle{fancy}
+      - \fancyhead[L]{\small \textbf{OWL Corridor Annual Economic Benchmark}}
+      - \fancyhead[R]{\small \rightmark}
+      - \fancyfoot[C]{\thepage}
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup-env
+#| include: false
+
+library(here)
+library(knitr)
+library(tidyverse)
+
+# Load pre-calculated inline annual report variables
+vars_path <- here::here("data", "report_vars.rds")
+
+if (file.exists(vars_path)) {
+  report_vars <- readRDS(vars_path)
+} else {
+  # Fallback structure if script hasn't populated data yet
+  report_vars <- list(
+    benchmark_year       = "Latest Available",
+    total_corridor_pop   = "N/A",
+    pop_change_pct       = "N/A",
+    washtenaw_mhi        = "N/A",
+    oakland_mhi          = "N/A",
+    livingston_mhi       = "N/A",
+    corridor_bach_pct    = "N/A"
+  )
+}
+```
+
+## Executive Summary (`r report_vars$benchmark_year`)
+
+- **Population & Migration:** Total population across the OWL Corridor reached **`r report_vars$total_corridor_pop`**, reflecting a year-over-year change of **`r report_vars$pop_change_pct`%**.
+
+- **Real Household Purchasing Power:** Median Household Income (ACS 5-Year Inflation-Adjusted) stood at **\$`r report_vars$washtenaw_mhi`** in Washtenaw County, **\$`r report_vars$oakland_mhi`** in Oakland County, and **\$`r report_vars$livingston_mhi`** in Livingston County.
+
+- **Human Capital Baseline:** **`r report_vars$corridor_bach_pct`%** of corridor residents aged 25 and older hold a Bachelor's degree or higher.
+  :::
+
+## 1. Demographic & Population Migration Trajectories
+
+Census Population Estimates Program (PEP) data tracks net migration, natural population change, and overall regional growth relative to statewide Michigan trends.
+
+![Regional Population Growth Index Across OWL Corridor Counties](`r here::here("plots", "annual_population_index.png")`){#fig-pop fig-align="center" width=100%}
+
+## 2. Real Income Dynamics & Socioeconomic Baselines
+
+American Community Survey (ACS) 5-Year Estimates reveal underlying income distribution, real purchasing power trends, and regional living standards.
+
+![Real Median Household Income Trajectories (Inflation-Adjusted USD)](`r here::here("plots", "annual_median_income.png")`){#fig-mhi fig-align="center" width=100%}
+
+## 3. Structural Labor Force & Participation Benchmarks
+
+Multi-year annual average labor force levels and participation metrics smooth out seasonal volatility to illustrate long-term labor supply supply trends.
+
+![Annual Average Labor Force Trajectories and Structural Benchmarks](`r here::here("plots", "annual_unemployment_benchmark.png")`){#fig-labor fig-align="center" width=100%}
+
+::: {.text-muted style="font-size: 0.8em;"}
+**Data Sources:** U.S. Census Bureau (Population Estimates Program & American Community Survey 5-Year Estimates) and U.S. Bureau of Labor Statistics (LAUS Annual Averages). Compiled automatically via *The Compass Lens Architecture*.
+:::
