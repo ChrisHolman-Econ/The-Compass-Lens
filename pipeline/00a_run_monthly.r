@@ -1,22 +1,38 @@
-# pipeline/00a_run_monthly.R
+# ==============================================================================
+# Pipeline Execution: Monthly Economic Briefing
+# ==============================================================================
+
 library(here)
 library(quarto)
+library(cli)
 
-cat("========================================================\n")
-cat(" RUNNING MONTHLY BRIEF CADENCE (ELT -> ANALYTICS -> REPORT)\n")
-cat("========================================================\n")
+cli_h1("Executing OWL Monthly Economic Briefing Pipeline")
 
-# 1. Run pipeline ETL & Monthly Visualization
-source(here("pipeline", "01_load_fred.r"))
-source(here("pipeline", "02_load_bls.r"))
-source(here("pipeline", "04_hydrate_duckdb.r"))
-source(here("pipeline", "05_transform_analytics.r"))
-source(here("pipeline", "06_prep_report_vars.r"))
-source(here("pipeline", "07_plot_monthly.r"))
+# 1. Execute ELT & Visuals
+source(here::here("pipeline", "01_fetch_monthly_data.R"))
+source(here::here("pipeline", "04_generate_monthly_plots.R"))
+source(here::here("pipeline", "06_prep_report_vars.R"))
 
-# 2. Render Quarto Monthly Briefing
-quarto_render(
-  input = here("templates", "monthly_brief.qmd"),
-  output_file = sprintf("%s_monthly_brief.pdf", format(Sys.Date(), "%Y-%m")),
-  output_dir = here("reports", "monthly")
+# 2. Ensure Output Directory Exists
+output_dir <- here::here("output", "monthly")
+if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
+
+# 3. Define Stamp Filename
+stamp <- format(Sys.Date(), "%Y_%m")
+out_filename <- paste0("OWL_Monthly_Briefing_", stamp, ".pdf")
+
+# 4. Render Quarto Document
+cli_alert_info("Rendering templates/monthly_brief.qmd to PDF...")
+
+quarto::quarto_render(
+  input = here::here("templates", "monthly_brief.qmd"),
+  output_file = out_filename
 )
+
+# 5. Move Rendered PDF to output/monthly/
+file.rename(
+  from = here::here("templates", out_filename),
+  to   = file.path(output_dir, out_filename)
+)
+
+cli_alert_success("Monthly PDF successfully rendered: {file.path(output_dir, out_filename)}")
