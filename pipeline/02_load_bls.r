@@ -1,7 +1,7 @@
 # ==============================================================================
 # SCRIPT:  02_load_bls.r
 # PROJECT: The Compass Lens
-# PURPOSE: Extract Michigan LAUS & QCEW datasets from raw caches and BLS API.
+# PURPOSE: Extract Michigan LAUS & QCEW datasets with httr2 retry logic.
 # DEPENDENCIES: data.table, httr2, base R
 # ==============================================================================
 
@@ -21,14 +21,13 @@ if (!dir.exists(BLS_DIR)) {
   dir.create(BLS_DIR, recursive = TRUE)
 }
 
-options(HTTPUserAgent = "TheCompassLens/1.0 (Public Benefit Pipeline; holman_chris@icloud.com)")
 BLS_UA <- "TheCompassLens/1.0 (Public Benefit Pipeline; holman_chris@icloud.com)"
 
 message("========================================================")
 message("PROCESSING BLS DATASETS (MICHIGAN LAUS & QCEW)")
 message("========================================================\n")
 
-# 2. EXTRACT MICHIGAN LAUS FROM MASTER COUNTY FLAT-FILE
+# 2. VERIFY / EXTRACT MICHIGAN LAUS
 # ------------------------------------------------------------------------------
 master_laus_path <- file.path(RAW_ROOT, "laus_county.txt")
 laus_dest_path   <- file.path(BLS_DIR, "laus_michigan.tsv")
@@ -36,8 +35,9 @@ laus_dest_path   <- file.path(BLS_DIR, "laus_michigan.tsv")
 cat("[*] Extracting Michigan LAUS records from master county cache...\n")
 
 if (file.exists(laus_dest_path) && file.info(laus_dest_path)$size > 1000) {
+  dt_check <- fread(laus_dest_path, select = 1)
   cat(sprintf(" [✓] LAUS cached file verified (%s rows).\n\n", 
-              format(nrow(fread(laus_dest_path, nrows = 100)), big.mark = ",")))
+              format(nrow(dt_check), big.mark = ",")))
 } else if (file.exists(master_laus_path)) {
   dt_laus <- fread(master_laus_path, sep = "\t", header = TRUE, fill = TRUE)
   setnames(dt_laus, names(dt_laus), trimws(names(dt_laus)))
@@ -49,7 +49,7 @@ if (file.exists(laus_dest_path) && file.info(laus_dest_path)$size > 1000) {
   cat(" [❌] Master file 'laus_county.txt' not found in data/raw/. Run 01_load_source.R first.\n\n")
 }
 
-# 3. FETCH MICHIGAN QCEW CSV VIA HTTR2 API REQUEST
+# 3. FETCH MICHIGAN QCEW CSV (WITH RETRY LOGIC & BROWSER HEADERS)
 # ------------------------------------------------------------------------------
 QCEW_YEAR <- "2024"
 QCEW_QTR  <- "1"
@@ -61,15 +61,23 @@ cat(sprintf("[*] Pulling Michigan QCEW CSV (%s Q%s) via httr2 API client...\n", 
 tryCatch({
   req <- request(QCEW_URL) |>
     req_headers(
-      `User-Agent`      = BLS_UA,
-      `Accept`          = "text/html,application/xhtml+xml,application/xml;q=0.9,text/csv;q=0.8,*/*;q=0.7",
-      `Accept-Language` = "en-US,en;q=0.9",
-      `Referer`         = "https://www.bls.gov/cew/"
+      `User-Agent`         = BLS_UA,
+      `Accept`             = "text/csv,text/html,application/xhtml+xml,*/*",
+      `Accept-Language`    = "en-US,en;q=0.9",
+      `Referer`            = "https://www.bls.gov/cew/",
+      `Sec-Fetch-Dest`     = "document",
+      `Sec-Fetch-Mode`     = "navigate",
+      `Sec-Fetch-Site`     = "same-site"
+    ) |>
+    # Automatically retry on 503, 500, or rate-limits up to 5 times with backoff
+    req_retry(
+      max_tries = 5,
+      backoff   = ~ 2^.x
     )
   
   resp <- req_perform(req, path = QCEW_DEST)
   
-  # Verify downloaded file payload
+  # Verify downloaded payload
   if (file.exists(QCEW_DEST) && file.info(QCEW_DEST)$size > 100) {
     first_line <- readLines(QCEW_DEST, n = 1, warn = FALSE)
     if (grepl("<!DOCTYPE|html", first_line, ignore.case = TRUE)) {
